@@ -9,9 +9,10 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 // Inisialisasi Midtrans dengan Server Key kamu
+// Server Key production (Mid-server-...) => isProduction harus true agar cocok dengan Client Key production di frontend.
 const snap = new midtransClient.Snap({
-    isProduction: false, // Ubah ke true jika sudah pakai akun Live (Uang asli)
-    serverKey: 'MASUKKAN_SERVER_KEY_MIDTRANS_KAMU' // Ganti dengan Server Key milikmu
+    isProduction: true,
+    serverKey: process.env.MIDTRANS_SERVER_KEY || 'Mid-server-tKm2E-VdJKKfY-0HqMmjXJn_'
 });
 
 // Endpoint API untuk meminta token Midtrans
@@ -19,10 +20,14 @@ app.post('/api/get-token', async (req, res) => {
     try {
         const { order_id, gross_amount, customer_details } = req.body;
 
+        if (!order_id || !gross_amount) {
+            return res.status(400).json({ error: 'order_id dan gross_amount wajib diisi.' });
+        }
+
         const transaction = await snap.createTransaction({
-            "transaction_details": { 
-                "order_id": order_id, 
-                "gross_amount": gross_amount 
+            "transaction_details": {
+                "order_id": order_id,
+                "gross_amount": Math.round(Number(gross_amount)) // Midtrans mewajibkan nominal bulat (integer)
             },
             "customer_details": customer_details
         });
@@ -30,6 +35,8 @@ app.post('/api/get-token', async (req, res) => {
         // Kirim balik tokennya ke laptop resepsionis
         res.json({ snap_token: transaction.token });
     } catch (error) {
+        // Log detail error di server (Vercel logs) supaya mudah didiagnosa
+        console.error('Midtrans createTransaction error:', error.message, error.ApiResponse || '');
         res.status(500).json({ error: error.message });
     }
 });
