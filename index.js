@@ -11,8 +11,8 @@ app.use(express.json());
 // Inisialisasi Midtrans dengan Server Key kamu
 // Server Key production (Mid-server-...) => isProduction harus true agar cocok dengan Client Key production di frontend.
 const snap = new midtransClient.Snap({
-    isProduction: true,
-    serverKey: process.env.MIDTRANS_SERVER_KEY || 'Mid-server-tKm2E-VdJKKfY-0HqMmjXJn_'
+    isProduction: false, // Ubah ke false untuk ujicoba Sandbox
+    serverKey: process.env.MIDTRANS_SERVER_KEY || 'https://app.sandbox.midtrans.com/snap/v1/transactions'
 });
 
 // Endpoint API untuk meminta token Midtrans
