@@ -15,10 +15,14 @@ const snap = new midtransClient.Snap({
     'Mid-server-tKm2E-VdJKKfY-0HqMmjXJn_'
 });
 
-
-const resend = new Resend(
-    process.env.RESEND_API_KEY
-);
+const resend =
+process.env.RESEND_API_KEY
+?
+new Resend(
+ process.env.RESEND_API_KEY
+)
+:
+null;
 
 app.post('/api/get-token', async (req, res) => {
 
