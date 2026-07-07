@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     method:"POST",
     headers:{
      "Authorization":
-     `Bearer ${process.env.re_eqniK4sj_Pd5MzSDWJN5TrnChQaEYBa6b}`,
+     `Bearer ${process.env.re_RyW85dfw_DDhDEF1YircG51M8m2ZU6kr8}`,
      "Content-Type":
      "application/json"
     },
