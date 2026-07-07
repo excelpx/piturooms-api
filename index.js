@@ -131,27 +131,26 @@ app.post('/api/send-invoice', async (req, res) => {
 
 
 
-        const result =
-        await resend.emails.send({
+const result =
+await resend.emails.send({
+
+    from:
+    "Piturooms <onboarding@resend.dev>",
 
 
-            from:
-            "Piturooms <onboarding@resend.dev>",
+    to:[
+      email
+    ],
 
 
-            to:
-            email,
+    subject:
+    `Invoice Booking ${bookingCode}`,
 
 
-            subject:
-            `Invoice Booking ${bookingCode}`,
+    html:
+    invoiceHTML
 
-
-            html:
-            invoiceHTML
-
-
-        });
+});
 
 
 
