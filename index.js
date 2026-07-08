@@ -231,8 +231,27 @@ to:
 email,
 
 
+replyTo:
+process.env.EMAIL_USER,
+
+
 subject:
-`Invoice Booking ${bookingCode}`,
+`Konfirmasi Reservasi PituRooms - ${bookingCode}`,
+
+
+text:
+`
+Terima kasih sudah melakukan reservasi di PituRooms.
+
+Kode Booking:
+${bookingCode}
+
+Pembayaran berhasil diterima.
+Silakan simpan kode booking ini untuk proses check-in.
+
+Salam,
+PituRooms Hotel Reservation
+`,
 
 
 html:
@@ -240,7 +259,6 @@ invoiceHTML
 
 
 });
-
 
 
 
