@@ -224,7 +224,7 @@ await transporter.sendMail({
 
 
 from:
-`Piturooms <${process.env.EMAIL_USER}>`,
+`PituRooms Hotel Reservation <${process.env.EMAIL_USER}>`,
 
 
 to:
