@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const midtransClient = require("midtrans-client");
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
 
 const app = express();
@@ -27,7 +27,7 @@ app.use(
 
 
 app.use(
-  express.json()
+ express.json()
 );
 
 
@@ -39,30 +39,40 @@ app.use(
 const snap =
 new midtransClient.Snap({
 
-  isProduction:
-  false,
+ isProduction:false,
 
 
-  serverKey:
-  process.env.MIDTRANS_SERVER_KEY ||
-  "Mid-server-tKm2E-VdJKKfY-0HqMmjXJn_"
+ serverKey:
+ process.env.MIDTRANS_SERVER_KEY ||
+ "Mid-server-tKm2E-VdJKKfY-0HqMmjXJn_"
 
 });
 
 
 
+
 // =======================
-// RESEND CONFIG
+// GMAIL NODEMAILER CONFIG
 // =======================
 
-const resend =
-process.env.RESEND_API_KEY
-?
-new Resend(
-  process.env.RESEND_API_KEY
-)
-:
-null;
+const transporter =
+nodemailer.createTransport({
+
+ service:"gmail",
+
+
+ auth:{
+
+  user:
+  process.env.EMAIL_USER,
+
+
+  pass:
+  process.env.EMAIL_PASS
+
+ }
+
+});
 
 
 
@@ -74,7 +84,7 @@ null;
 
 app.post(
 "/api/get-token",
-async (req,res)=>{
+async(req,res)=>{
 
 
 try{
@@ -84,9 +94,7 @@ const {
  order_id,
  gross_amount,
  customer_details
-}
-=
-req.body;
+}=req.body;
 
 
 
@@ -95,16 +103,13 @@ if(
  !gross_amount
 ){
 
-
-return res
-.status(400)
+return res.status(400)
 .json({
 
- error:
- "order_id dan gross_amount wajib diisi"
+error:
+"order_id dan gross_amount wajib diisi"
 
 });
-
 
 }
 
@@ -114,22 +119,24 @@ const transaction =
 await snap.createTransaction({
 
 
- transaction_details:{
-
-  order_id:
-  order_id,
+transaction_details:{
 
 
-  gross_amount:
-  Math.round(
-   Number(gross_amount)
-  )
-
- },
+ order_id:
+ order_id,
 
 
- customer_details:
- customer_details
+ gross_amount:
+ Math.round(
+  Number(gross_amount)
+ )
+
+
+},
+
+
+customer_details:
+customer_details
 
 
 });
@@ -149,18 +156,16 @@ return res.json({
 
 
 console.error(
- "MIDTRANS ERROR:",
- error
+"MIDTRANS ERROR:",
+error
 );
 
 
-
-return res
-.status(500)
+return res.status(500)
 .json({
 
- error:
- error.message
+error:
+error.message
 
 });
 
@@ -173,15 +178,14 @@ return res
 
 
 
-
 // =======================
-// SEND INVOICE EMAIL
+// SEND INVOICE EMAIL GMAIL
 // =======================
 
 
 app.post(
 "/api/send-invoice",
-async (req,res)=>{
+async(req,res)=>{
 
 
 try{
@@ -191,9 +195,7 @@ const {
  email,
  bookingCode,
  invoiceHTML
-}
-=
-req.body;
+}=req.body;
 
 
 
@@ -203,63 +205,38 @@ if(
  !invoiceHTML
 ){
 
-
-return res
-.status(400)
+return res.status(400)
 .json({
 
- success:false,
+success:false,
 
- error:
- "Email atau invoice kosong"
+error:
+"Email atau invoice kosong"
 
 });
 
-
 }
-
-
-
-
-if(!resend){
-
-
-return res
-.status(500)
-.json({
-
- success:false,
-
- error:
- "RESEND_API_KEY belum tersedia"
-
-});
-
-
-}
-
 
 
 
 const result =
-await resend.emails.send({
+await transporter.sendMail({
 
 
- from:
- "Piturooms <onboarding@resend.dev>",
+from:
+`Piturooms <${process.env.EMAIL_USER}>`,
 
 
- to:[
-  email
- ],
+to:
+email,
 
 
- subject:
- `Invoice Booking ${bookingCode}`,
+subject:
+`Invoice Booking ${bookingCode}`,
 
 
- html:
- invoiceHTML
+html:
+invoiceHTML
 
 
 });
@@ -269,13 +246,12 @@ await resend.emails.send({
 
 return res.json({
 
- success:true,
+success:true,
 
- data:
- result
+data:
+result
 
 });
-
 
 
 
@@ -283,28 +259,25 @@ return res.json({
 }catch(error){
 
 
-
 console.error(
- "RESEND ERROR:",
- error
+"GMAIL ERROR:",
+error
 );
 
 
 
-return res
-.status(500)
+return res.status(500)
 .json({
 
- success:false,
+success:false,
 
- error:
- error.message
+error:
+error.message
 
 });
 
 
 }
-
 
 
 });
